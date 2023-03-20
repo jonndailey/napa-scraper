@@ -18,7 +18,7 @@ async function getLatestEpisodes(feeds) {
 
 	for (const feed of feeds) {
 		const feedData = await parser.parseURL(feed);
-		const episodes = feedData.items.slice(0, 3);
+		const episodes = feedData.items.slice(0, 10);
 		latestEpisodes.push(...episodes);
 	}
 
@@ -44,39 +44,75 @@ async function getCachedEpisodes() {
 
 app.get('/', async (req, res) => {
 	const latestEpisodes = await getCachedEpisodes();
-	const { episodeIndex = 0 } = req.query;
+	const episodeIndex = Math.floor(Math.random() * latestEpisodes.length);
 	const currentEpisode = latestEpisodes[episodeIndex];
-	//console.log(latestEpisodes[episodeIndex]);
-	const episodeHtml = `
-	<div>
-	  <h2>${currentEpisode.title}</h2>
-	  
-	  <audio src="${currentEpisode.enclosure.url}" preload="none" controls></audio>
-	  <h2>${currentEpisode.content}</h2>
-	</div>
-  `;
 
-	const previousEpisodeIndex = Math.max(0, parseInt(episodeIndex, 10) - 1);
-	const nextEpisodeIndex = Math.min(latestEpisodes.length - 1, parseInt(episodeIndex, 10) + 1);
+	const episodeHtml = `
+		<div>
+			<h2>${currentEpisode.itunes.author}</h2>
+			<h2><img src='${currentEpisode.itunes.image}' /style='width:300px;height:300px;'></h2>
+			<h3>${currentEpisode.title}</h3>
+			<audio src="${currentEpisode.enclosure.url}" preload="none" controls autoplay></audio>
+		</div>
+	`;
 
 	const navigationHtml = `
-	<div>
-	  <a href="/?episodeIndex=${previousEpisodeIndex}">Previous</a>
-	  <a href="/?episodeIndex=${nextEpisodeIndex}">Next</a>
-	</div>
-  `;
+		<div>
+			<a href="/?episodeIndex=${episodeIndex}" id="previousButton">Previous</a>
+			<a href="#" id="continuePlaying">Continue Playing</a>
+			<a href="/?episodeIndex=${episodeIndex}" id="nextButton">Next</a>
+		</div>
+	`;
 
 	const html = `
-	<html>
-	  <head>
-		<title>Podcast Player</title>
-	  </head>
-	  <body>
-		${episodeHtml}
-		${navigationHtml}
-	  </body>
-	</html>
-  `;
+			<html>
+				<head>
+					<title>Podcast Player</title>
+				</head>
+				<body>
+					${episodeHtml}
+					${navigationHtml}
+				</body>
+				<script>
+					let skipTimer = null;
+					const audio = document.querySelector('audio');
+					const previousButton = document.querySelector('#previousButton');
+					const continuePlayingButton = document.querySelector('#continuePlaying');
+					const nextButton = document.querySelector('#nextButton');
+					
+					const startTimer = () => {
+						skipTimer = setTimeout(() => {
+							window.location.href = nextButton.href;
+						}, 15000);
+					};
+	
+					const resetTimer = () => {
+						clearTimeout(skipTimer);
+						startTimer();
+					};
+	
+					audio.addEventListener('loadedmetadata', () => {
+						const startTime = Math.floor(Math.random() * audio.duration);
+						audio.currentTime = startTime;
+						audio.play();
+						startTimer();
+					});
+	
+					continuePlayingButton.addEventListener('click', (event) => {
+						event.preventDefault();
+						clearTimeout(skipTimer);
+					});
+	
+					nextButton.addEventListener('click', () => {
+						resetTimer();
+					});
+	
+					previousButton.addEventListener('click', () => {
+						resetTimer();
+					});
+				</script>
+			</html>
+		`;
 
 	res.send(html);
 });
