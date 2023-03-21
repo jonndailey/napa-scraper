@@ -6,7 +6,7 @@ const port = 3000;
 
 //const FEEDS = ['https://rss.art19.com/morbid-a-true-crime-podcast', 'https://rss.art19.com/erm-mfm', 'https://rss.art19.com/48-hours', 'https://rss.art19.com/somethingwaswrong', 'https://rss.art19.com/smalltownmurder', 'https://rss.art19.com/this-is-actually-happening-podcast', 'https://rss.art19.com/stolen-hearts', 'https://rss.art19.com/american-scandal', 'https://rss.art19.com/the-vanished-podcast-wondery', 'https://rss.art19.com/generation-why-podcast', 'https://rss.art19.com/scamfluencers', 'https://rss.art19.com/scamfluencers', 'https://rss.art19.com/true-crime-all-the-time', 'https://rss.art19.com/killer-psyche'];
 
-const FEEDS = ['https://atp.fm/rss', 'https://feeds.megaphone.fm/darknetdiaries', 'https://feeds.simplecast.com/1_9aBk7M', 'https://daringfireball.net/thetalkshow/rss', 'https://feeds.redcircle.com/92bf9085-a91e-49f6-81b8-5b651b52ba3f?_ga=2.40878434.1504349826.1678823285-1290121214.1678823285', 'https://feed.podbean.com/geekanddestroy/feed.xml', 'https://podcast.panic.com/index.xml', 'https://rss.art19.com/business-movers'];
+const FEEDS = ['https://atp.fm/rss', 'https://feeds.megaphone.fm/darknetdiaries', 'https://feeds.simplecast.com/1_9aBk7M', 'https://daringfireball.net/thetalkshow/rss', 'https://feeds.redcircle.com/92bf9085-a91e-49f6-81b8-5b651b52ba3f?_ga=2.40878434.1504349826.1678823285-1290121214.1678823285', 'https://feed.podbean.com/geekanddestroy/feed.xml', 'https://rss.art19.com/business-movers'];
 
 const CACHE_TTL = 60 * 60 * 1000; // cache feed data for 1 hour
 let cache = {
@@ -152,6 +152,7 @@ app.get('/', async (req, res) => {
 				progressBar.addEventListener('input', () => {
 					isDragging = true;
 					clearInterval(skipTimer);
+					countdownElement.style.display = 'none';
 				});
 				
 				progressBar.addEventListener('change', () => {
@@ -164,6 +165,7 @@ app.get('/', async (req, res) => {
 				
 				startFromBeginning.addEventListener('click', () => {
 					clearInterval(skipTimer);
+					countdownElement.style.display = 'none';
 					audio.currentTime = 0;
 					audio.play();
 				});
