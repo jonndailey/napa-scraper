@@ -10,6 +10,13 @@
     "node-fetch": "^2.6.0",
     "play-sound": "^1.1.5",
     "rss-parser": "^3.12.0",
-    "xml2js": "^0.4.23"
+    "xml2js": "^0.4.23",
+    "nodemon": "^2.0.21"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.21"
+  },
+  "scripts": {
+    "start:dev": "nodemon index.js"
   }
 }
