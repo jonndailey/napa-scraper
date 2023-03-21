@@ -4,6 +4,8 @@ const Parser = require('rss-parser');
 const app = express();
 const port = 3000;
 
+//const FEEDS_FOR_MY_LOVE = ['https://rss.art19.com/morbid-a-true-crime-podcast', 'https://rss.art19.com/erm-mfm', 'https://rss.art19.com/48-hours', 'https://rss.art19.com/somethingwaswrong', 'https://rss.art19.com/smalltownmurder', 'https://rss.art19.com/this-is-actually-happening-podcast', 'https://rss.art19.com/stolen-hearts', 'https://rss.art19.com/american-scandal', 'https://rss.art19.com/the-vanished-podcast-wondery', 'https://rss.art19.com/generation-why-podcast', 'https://rss.art19.com/scamfluencers', 'https://rss.art19.com/scamfluencers', 'https://rss.art19.com/true-crime-all-the-time', 'https://rss.art19.com/killer-psyche'];
+
 const FEEDS = ['https://atp.fm/rss', 'https://feeds.megaphone.fm/darknetdiaries', 'https://feeds.simplecast.com/1_9aBk7M', 'https://daringfireball.net/thetalkshow/rss', 'https://feeds.redcircle.com/92bf9085-a91e-49f6-81b8-5b651b52ba3f?_ga=2.40878434.1504349826.1678823285-1290121214.1678823285', 'https://feed.podbean.com/geekanddestroy/feed.xml', 'https://podcast.panic.com/index.xml', 'https://rss.art19.com/business-movers'];
 
 const CACHE_TTL = 60 * 60 * 1000; // cache feed data for 1 hour
@@ -24,7 +26,7 @@ async function getLatestEpisodes(feeds) {
 
 	// Randomize the episode list
 	latestEpisodes.sort(() => Math.random() - 0.5);
-
+	console.log(latestEpisodes);
 	return latestEpisodes;
 }
 
@@ -46,8 +48,6 @@ app.get('/', async (req, res) => {
 	const latestEpisodes = await getCachedEpisodes();
 	const episodeIndex = Math.floor(Math.random() * latestEpisodes.length);
 	const currentEpisode = latestEpisodes[episodeIndex];
-
-	
 
 	const episodeHtml = `
     <div style='width:300px;margin:0 auto;border:3px solid #ddd;padding:10px;'>
@@ -116,6 +116,14 @@ app.get('/', async (req, res) => {
 						audio.play();
 						startTimer();
 					  });
+					  
+					  audio.addEventListener('pause', ()=>{
+						clearInterval(skipTimer);  
+					  });
+					  
+					  audio.addEventListener('play', ()=>{
+						  resetTimer();
+						});
 			  
 					  continuePlayingButton.addEventListener('click', (event) => {
 						event.preventDefault();
@@ -132,10 +140,10 @@ app.get('/', async (req, res) => {
 					</script>
 				  </html>
 				`;
-			  
-				res.send(html);
-			  });
-			  
-			  app.listen(port, () => {
-				console.log(`Server listening on port ${port}`);
-			  });
+
+	res.send(html);
+});
+
+app.listen(port, () => {
+	console.log(`Server listening on port ${port}`);
+});
