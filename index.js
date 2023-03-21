@@ -47,20 +47,27 @@ app.get('/', async (req, res) => {
 	const episodeIndex = Math.floor(Math.random() * latestEpisodes.length);
 	const currentEpisode = latestEpisodes[episodeIndex];
 
+	
+
 	const episodeHtml = `
-		<div>
-			<h2>${currentEpisode.itunes.author}</h2>
-			<h2><img src='${currentEpisode.itunes.image}' /style='width:300px;height:300px;'></h2>
-			<h3>${currentEpisode.title}</h3>
-			<audio src="${currentEpisode.enclosure.url}" preload="none" controls autoplay></audio>
-		</div>
-	`;
+    <div style='width:300px;margin:0 auto;border:3px solid #ddd;padding:10px;'>
+      <h2>${currentEpisode.itunes.author}</h2>
+      <h2><img src='${currentEpisode.itunes.image}' /style='width:300px;height:300px;'></h2>
+      <h3>${currentEpisode.title}</h3>
+      <audio src="${currentEpisode.enclosure.url}" preload="none" controls autoplay></audio>
+      <div id="countdown" style="font-size: 24px; margin-top: 20px;text-align:center;"></div>
+    </div>
+  `;
 
 	const navigationHtml = `
-		<div>
-			<a href="/?episodeIndex=${episodeIndex}" id="previousButton">Previous</a>
-			<a href="#" id="continuePlaying">Continue Playing</a>
-			<a href="/?episodeIndex=${episodeIndex}" id="nextButton">Next</a>
+	<div style='width:300px;margin:0 auto;text-align:center;margin-top:20px;margin-bottom:20px;border-radius:8px;'> 
+			
+			<button id="skipButton"><a href="/?episodeIndex=${episodeIndex}" id="previousButton">Previous</a></button>
+			
+			<button><a href="#" id="continuePlaying">Continue Playing</a></button>
+
+			<button id="skipButton"><a href="/?episodeIndex=${episodeIndex}" id="nextButton">Next</a></button>
+			</div>
 		</div>
 	`;
 
@@ -68,55 +75,67 @@ app.get('/', async (req, res) => {
 			<html>
 				<head>
 					<title>Podcast Player</title>
-				</head>
-				<body>
-					${episodeHtml}
-					${navigationHtml}
-				</body>
-				<script>
-					let skipTimer = null;
-					const audio = document.querySelector('audio');
-					const previousButton = document.querySelector('#previousButton');
-					const continuePlayingButton = document.querySelector('#continuePlaying');
-					const nextButton = document.querySelector('#nextButton');
-					
-					const startTimer = () => {
-						skipTimer = setTimeout(() => {
+					</head>
+					<body>
+					  ${episodeHtml}
+					  ${navigationHtml}
+					</body>
+					<script>
+					  let skipTimer = null;
+					  const audio = document.querySelector('audio');
+					  const previousButton = document.querySelector('#previousButton');
+					  const continuePlayingButton = document.querySelector('#continuePlaying');
+					  const nextButton = document.querySelector('#nextButton');
+					  const countdownElement = document.querySelector('#countdown');
+			  
+					  const startTimer = () => {
+						let remainingTime = 15;
+			  
+						countdownElement.textContent = remainingTime;
+			  
+						skipTimer = setInterval(() => {
+						  remainingTime--;
+						  if (remainingTime >= 0) {
+							countdownElement.textContent = remainingTime;
+						  }
+						  if (remainingTime === 0) {
+							clearInterval(skipTimer);
 							window.location.href = nextButton.href;
-						}, 15000);
-					};
-	
-					const resetTimer = () => {
-						clearTimeout(skipTimer);
+						  }
+						}, 1000);
+					  };
+			  
+					  const resetTimer = () => {
+						clearInterval(skipTimer);
 						startTimer();
-					};
-	
-					audio.addEventListener('loadedmetadata', () => {
+					  };
+			  
+					  audio.addEventListener('loadedmetadata', () => {
 						const startTime = Math.floor(Math.random() * audio.duration);
 						audio.currentTime = startTime;
 						audio.play();
 						startTimer();
-					});
-	
-					continuePlayingButton.addEventListener('click', (event) => {
+					  });
+			  
+					  continuePlayingButton.addEventListener('click', (event) => {
 						event.preventDefault();
-						clearTimeout(skipTimer);
-					});
-	
-					nextButton.addEventListener('click', () => {
+						clearInterval(skipTimer);
+					  });
+			  
+					  nextButton.addEventListener('click', () => {
 						resetTimer();
-					});
-	
-					previousButton.addEventListener('click', () => {
+					  });
+			  
+					  previousButton.addEventListener('click', () => {
 						resetTimer();
-					});
-				</script>
-			</html>
-		`;
-
-	res.send(html);
-});
-
-app.listen(port, () => {
-	console.log(`Server listening on port ${port}`);
-});
+					  });
+					</script>
+				  </html>
+				`;
+			  
+				res.send(html);
+			  });
+			  
+			  app.listen(port, () => {
+				console.log(`Server listening on port ${port}`);
+			  });
